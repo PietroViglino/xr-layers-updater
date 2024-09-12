@@ -1,2 +1,8 @@
 .env
 *.tiff
+dist/*
+build/*
+*.spec
+*.exe
+dist/
+build/

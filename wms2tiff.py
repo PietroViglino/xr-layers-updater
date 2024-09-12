@@ -1,6 +1,8 @@
 from osgeo import gdal
 from xml.etree import ElementTree as ET
 from datetime import datetime, timedelta
+from dotenv import load_dotenv
+import sys
 import requests
 import numpy as np
 import os
@@ -9,8 +11,10 @@ import warnings
 
 warnings.filterwarnings("ignore")
 
-USERNAME = os.getenv('USERNAME')
-PASSWORD = os.getenv('PASSWORD')
+load_dotenv()
+
+USERNAME = os.getenv('USERNAME_DOTENV')
+PASSWORD = os.getenv('PASSWORD_DOTENV')
 
 gdal.SetConfigOption('GDAL_CACHEMAX', '2048')
 os.environ['GDAL_HTTP_TIMEOUT'] = '600'
@@ -24,6 +28,8 @@ step_begin = None
 step_end = None
 
 start_time = datetime.now()
+
+previous_line_len = 100
 
 def get_token():
     url = "https://webgis.abdac.it/portal/sharing/rest/generateToken"
@@ -39,47 +45,20 @@ def get_token():
     headers = {
         "Content-Type": "application/x-www-form-urlencoded"
     }
+    try:
+        response = requests.post(url, data=payload, headers=headers)
 
-    response = requests.post(url, data=payload, headers=headers)
-
-    g_token = response.json()["token"]
+        g_token = response.json()["token"]
+    except Exception as e:
+        print(f'Something went wrong when getting the token: {str(e)}')
     return g_token
+
 
 def clear_previous_lines(n=2):
     for _ in range(n):
-        print('\033[F\033[K', end='')
-
-def print_dataset_info(dataset):
-    if dataset is None:
-        print("Dataset is None.")
-        return
-
-    print("Dataset Information:")
-    print(f"Driver: {dataset.GetDriver().LongName}")
-    print(f"Number of Bands: {dataset.RasterCount}")
-
-    for i in range(dataset.RasterCount):
-        band = dataset.GetRasterBand(i + 1)
-        print(f"\nBand {i + 1}:")
-        print(f"  Type: {gdal.GetDataTypeName(band.DataType)}")
-        print(f"  Size: {band.XSize} x {band.YSize}")
-
-    print("\nGeoreference Information:")
-    geotransform = dataset.GetGeoTransform()
-    if geotransform:
-        print(f"  Top Left: ({geotransform[0]}, {geotransform[3]})")
-        print(f"  Pixel Size: {geotransform[1]} x {geotransform[5]}")
-    else:
-        print("  No georeference information available.")
-
-    print(f"\nProjection: {dataset.GetProjection()}")
-
-    metadata = dataset.GetMetadata()
-
-    if metadata:
-        print("\nMetadata:")
-        for key, value in metadata.items():
-            print(f"  {key}: {value}")
+        sys.stdout.write('\033[F')
+        sys.stdout.write('\033[K')
+        sys.stdout.flush()
 
 
 def get_capabilities(base_url, use_token=False):
@@ -95,6 +74,7 @@ def get_capabilities(base_url, use_token=False):
             
     except Exception as e:
         print(f'Error: {str(e)}')
+        sys.stdout.flush()
         return None
 
     capabilities = ET.fromstring(response.content)
@@ -135,6 +115,7 @@ def set_transparency(input_tiff, output_tiff, transparency):
     dataset = gdal.Open(input_tiff)
     if dataset is None:
         print("Failed to open the input TIFF file.")
+        sys.stdout.flush()
         return
 
     geotransform = dataset.GetGeoTransform()
@@ -178,6 +159,7 @@ def set_transparency(input_tiff, output_tiff, transparency):
 def merge_tiffs(files, output_file):
     try:
         print("Merging TIFF files...", end='\r', flush=True)
+        sys.stdout.flush()
 
         warp_options = gdal.WarpOptions(
             format='GTiff',
@@ -187,6 +169,7 @@ def merge_tiffs(files, output_file):
         gdal.Warp(destNameOrDestDS=output_file, srcDSOrSrcDSTab=files, options=warp_options)
 
         print(f"TIFF files merged successfully into {output_file}", end='\r', flush=True)
+        sys.stdout.flush()
 
         if delete_temp_files:
             for file in files:
@@ -197,11 +180,13 @@ def merge_tiffs(files, output_file):
 
     except Exception as e:
         print(f"Error during merging: {str(e)}")
+        sys.stdout.flush()
 
 
 def download_wms_layer(wms_url, output_tiff):
     global step_begin
     global step_end
+    global previous_line_len
 
     output_files = []
     time_diffs = []
@@ -238,6 +223,7 @@ def download_wms_layer(wms_url, output_tiff):
 
             if wms_dataset is None:
                 print("GDAL failed to open the WMS dataset.")
+                sys.stdout.flush()
                 return
             
             tot_quadrants = n_of_quadrants * n_of_quadrants
@@ -261,8 +247,12 @@ def download_wms_layer(wms_url, output_tiff):
             else:
                 eta_str = ''
 
-            print('\r' + (' ' * 150), end='', flush=True)
+            print('\r' + (' ' * previous_line_len), end='', flush=True)
+            sys.stdout.flush()
             print(f'\rDownloading {i}/{tot_quadrants}...  {eta_str}', end='', flush=True)
+            sys.stdout.flush()
+
+            previous_line_len = len(f'\rDownloading {i}/{tot_quadrants}...  {eta_str}')
 
             output_file_with_idx = temp_output_tiff.replace('.tiff', f'_{i}.tiff')
             gdal.Translate(output_file_with_idx, wms_dataset, format='GTiff', width=width, height=height, options=options)
@@ -279,31 +269,42 @@ def download_wms_layer(wms_url, output_tiff):
 
             elapsed = step_end - step_begin
             time_diffs.append(elapsed)
-
+        
         print('\r' + ' ' * 150, end='\r', flush=True)
+        sys.stdout.flush()
 
         merge_tiffs(output_files, output_tiff)
     except Exception as e:
         print(f"Error: {str(e)}")
+        sys.stdout.flush()
 
 if __name__ == "__main__":
     print('------WMS to TIFF------')
+    sys.stdout.flush()
     
-    # base_wms_url = 'https://webgis.abdac.it/server/services/ETT_PERIC_FRANA_DISTR/MapServer/WMSServer'
+    base_wms_url = 'https://webgis.abdac.it/server/services/ETT_PERIC_FRANA_DISTR/MapServer/WMSServer'
     # base_wms_url = 'https://webgis.abdac.it/server/services/Pericolosit%C3%A0_idraulica_Progetto_PAI_distr___solo_fluviale___bozza_/MapServer/WMSServer'
 
-    base_wms_url = input('Please write the URL to the WMS Layer:\n')
-
-    clear_previous_lines(n=2)
+    # base_wms_url = input('Please write the URL to the WMS Layer:\n')
+    # clear_previous_lines(n=2)
 
     output_path = input('Please write a name for the output tiff file:\n')
     if not output_path.endswith('.tiff'):
         output_path += '.tiff'
 
     clear_previous_lines(n=2)
-    
+
     print(f'Job started at {start_time}' + ' ' * 50)
-    download_wms_layer(base_wms_url, output_path)
-    print(f'Job finished at {datetime.now()}')
-    cwd = os.getcwd()
-    print(f'File saved as {output_path} in {cwd}')
+    sys.stdout.flush()
+    try:
+        download_wms_layer(base_wms_url, output_path)
+        
+        print(f'Job finished at {datetime.now()}')
+        sys.stdout.flush()
+        cwd = os.getcwd()
+        print(f'File saved as {output_path} in {cwd}')
+        sys.stdout.flush()
+
+    except Exception as e:
+        print(f'Something went wrong: {str(e)}')
+        sys.stdout.flush()
