@@ -2,6 +2,7 @@ from osgeo import gdal
 from xml.etree import ElementTree as ET
 from datetime import datetime, timedelta
 from dotenv import load_dotenv
+from colorama import init, Cursor
 import sys
 import requests
 import numpy as np
@@ -11,6 +12,8 @@ import warnings
 
 warnings.filterwarnings("ignore")
 
+init(autoreset=True)
+
 load_dotenv()
 
 USERNAME = os.getenv('USERNAME_DOTENV')
@@ -19,8 +22,8 @@ PASSWORD = os.getenv('PASSWORD_DOTENV')
 gdal.SetConfigOption('GDAL_CACHEMAX', '2048')
 os.environ['GDAL_HTTP_TIMEOUT'] = '600'
 
-n_of_quadrants = 16 # 16, 8, 4, 2
-wh_size = 25000 # 10000, 25000, 50000
+n_of_quadrants = 32 # 16, 8, 4, 2
+wh_size = 5000 # 10000, 25000, 50000
 
 delete_temp_files = True
 
@@ -50,13 +53,15 @@ def get_token():
 
         g_token = response.json()["token"]
     except Exception as e:
-        print(f'Something went wrong when getting the token: {str(e)}')
+        print(f'Something went wrong when requesting the token: {str(e)}')
+        time.sleep(2)
+        sys.exit(0)
     return g_token
 
 
 def clear_previous_lines(n=2):
     for _ in range(n):
-        sys.stdout.write('\033[F')
+        sys.stdout.write(Cursor.UP(1))
         sys.stdout.write('\033[K')
         sys.stdout.flush()
 
@@ -181,6 +186,8 @@ def merge_tiffs(files, output_file):
     except Exception as e:
         print(f"Error during merging: {str(e)}")
         sys.stdout.flush()
+        time.sleep(2)
+        sys.exit(0)
 
 
 def download_wms_layer(wms_url, output_tiff):
@@ -277,6 +284,8 @@ def download_wms_layer(wms_url, output_tiff):
     except Exception as e:
         print(f"Error: {str(e)}")
         sys.stdout.flush()
+        time.sleep(2)
+        sys.exit(0)
 
 if __name__ == "__main__":
     print('------WMS to TIFF------')
@@ -308,3 +317,5 @@ if __name__ == "__main__":
     except Exception as e:
         print(f'Something went wrong: {str(e)}')
         sys.stdout.flush()
+        time.sleep(2)
+        sys.exit(0)
