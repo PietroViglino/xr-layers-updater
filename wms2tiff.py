@@ -1,3 +1,4 @@
+
 from osgeo import gdal
 from xml.etree import ElementTree as ET
 from datetime import datetime, timedelta
@@ -22,8 +23,8 @@ PASSWORD = os.getenv('PASSWORD_DOTENV')
 gdal.SetConfigOption('GDAL_CACHEMAX', '2048')
 os.environ['GDAL_HTTP_TIMEOUT'] = '600'
 
-n_of_quadrants = 32 # 16, 8, 4, 2
-wh_size = 5000 # 10000, 25000, 50000
+# n_of_quadrants = 32 # 16, 8, 4, 2
+# wh_size = 5000 # 10000, 25000, 50000
 
 delete_temp_files = True
 
@@ -34,7 +35,12 @@ start_time = datetime.now()
 
 previous_line_len = 100
 
+
 def get_token():
+    """This function takes the username and password from the env file
+    and makes a request to webgis.abdac to gather the token that will be used
+    in the following requests
+    """
     url = "https://webgis.abdac.it/portal/sharing/rest/generateToken"
     payload = {
         "username": USERNAME,
@@ -60,13 +66,17 @@ def get_token():
 
 
 def clear_previous_lines(n=2):
+    """This function clears the n previously written lines in the terminal
+    """
     for _ in range(n):
         sys.stdout.write(Cursor.UP(1))
         sys.stdout.write('\033[K')
         sys.stdout.flush()
 
 
-def get_capabilities(base_url, use_token=False):
+def get_capabilities(base_url, use_token=False, qs=4):
+    """This function makes a request to the WMS, using the token if needed,
+    to obtain the Capabilities of the layer"""
     capabilities_url = f'{base_url}?service=WMS&version=1.3.0&request=GetCapabilities'
 
     try:
@@ -98,6 +108,8 @@ def get_capabilities(base_url, use_token=False):
     miny = float(capabilities.find('.//ns0:BoundingBox', namespace).attrib.get('miny'))
     maxy = float(capabilities.find('.//ns0:BoundingBox', namespace).attrib.get('maxy'))
 
+    n_of_quadrants = qs
+
     step_x = (maxx - minx) / n_of_quadrants
     step_y = (maxy - miny) / n_of_quadrants
 
@@ -117,6 +129,9 @@ def get_capabilities(base_url, use_token=False):
 
 
 def set_transparency(input_tiff, output_tiff, transparency):
+    """This function post processes the downloaded tiff file
+    and sets its transparency
+    """
     dataset = gdal.Open(input_tiff)
     if dataset is None:
         print("Failed to open the input TIFF file.")
@@ -162,6 +177,11 @@ def set_transparency(input_tiff, output_tiff, transparency):
 
 
 def merge_tiffs(files, output_file):
+    """This function merges the temp files obtained with the split requests
+    into a single tiff file. If the process is successfull and the variable
+    delete_temp_files is set to True, it will also delete the temp folder
+    and its content
+    """
     try:
         print("Merging TIFF files...", end='\r', flush=True)
         sys.stdout.flush()
@@ -185,21 +205,59 @@ def merge_tiffs(files, output_file):
 
     except Exception as e:
         print(f"Error during merging: {str(e)}")
+        print('Exiting...')
         sys.stdout.flush()
         time.sleep(2)
         sys.exit(0)
 
+def retry_download(bbox, i, wms_url, g_token, wh, temp_output_tiff, output_files):
+    """If some chunk requests have failed this function will 
+    try to download those parts of the file again"""
+    options = [
+                '-co', 'ALPHA=YES',
+                '-co', 'TILED=YES',
+                '-co', 'COMPRESS=LZW'
+            ]
 
-def download_wms_layer(wms_url, output_tiff):
+    width, height = wh, wh
+
+    wms_url_with_size = f'{wms_url}?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetMap&styles=default&LAYERS=0&WIDTH={width}&HEIGHT={height}\
+        &FORMAT=image/png&TRANSPARENT=true&CRS=EPSG:4326&BBOX={bbox}&token={g_token}'
+
+    wms_dataset = gdal.Open(wms_url_with_size)
+
+    if wms_dataset is None:
+        print("GDAL failed to open the WMS dataset.")
+        sys.stdout.flush()
+        return
+
+    output_file_with_idx = temp_output_tiff.replace('.tiff', f'_{i}.tiff')
+    gdal.Translate(output_file_with_idx, wms_dataset, format='GTiff', width=width, height=height, options=options)
+    
+    output_files.append(output_file_with_idx)
+
+    set_transparency(output_file_with_idx, output_file_with_idx.replace('.tiff', '_transp.tiff'), transparency=0.5)
+    output_files.remove(output_file_with_idx)
+    if os.path.exists(output_file_with_idx):
+        os.remove(output_file_with_idx)
+    output_files.append(output_file_with_idx.replace('.tiff', '_transp.tiff'))
+
+
+def download_wms_layer(wms_url, output_tiff, wh, qs):
+    """This is the main function. It will get the capabilities for the layer,
+    make split requests to obtain the portions of the layer and if the process
+    is successfull it will merge these files into the final tiff output
+    """
     global step_begin
     global step_end
     global previous_line_len
 
     output_files = []
     time_diffs = []
+    failed = []
 
     try:
-        capabilities = get_capabilities(wms_url, use_token=True)
+        capabilities = get_capabilities(wms_url, use_token=True, qs=qs)
 
         max_width = capabilities['max_width']
         max_height = capabilities['max_height']
@@ -207,12 +265,14 @@ def download_wms_layer(wms_url, output_tiff):
         width = max_width
         height = max_height
 
-        width, height = wh_size, wh_size
+        width, height = wh, wh
 
         if 'temp' not in os.listdir():
             os.mkdir('temp')
 
         temp_output_tiff = os.path.join('temp', output_tiff)
+
+        g_token = get_token()
 
         for idx, bbox in enumerate(capabilities['bboxes']):
             options = [
@@ -221,19 +281,21 @@ def download_wms_layer(wms_url, output_tiff):
                 '-co', 'COMPRESS=LZW'
             ]
 
-            g_token = get_token()
-
             wms_url_with_size = f'{wms_url}?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetMap&styles=default&LAYERS=0&WIDTH={width}&HEIGHT={height}\
                 &FORMAT=image/png&TRANSPARENT=true&CRS=EPSG:4326&BBOX={bbox}&token={g_token}'
 
-            wms_dataset = gdal.Open(wms_url_with_size)
+            try:
+                wms_dataset = gdal.Open(wms_url_with_size)
+            except:
+                failed.append((bbox, i))
+                continue
 
             if wms_dataset is None:
                 print("GDAL failed to open the WMS dataset.")
                 sys.stdout.flush()
                 return
             
-            tot_quadrants = n_of_quadrants * n_of_quadrants
+            tot_quadrants = qs * qs
             i = idx + 1
 
             step_begin = time.time()
@@ -276,6 +338,17 @@ def download_wms_layer(wms_url, output_tiff):
 
             elapsed = step_end - step_begin
             time_diffs.append(elapsed)
+
+        if failed:
+            print(f'\rRetrying failed downloads...', end='', flush=True)
+            g_token = get_token()
+            for idx, to_retry in enumerate(failed):
+                print('\r' + (' ' * previous_line_len), end='', flush=True)
+                sys.stdout.flush()
+                print(f'\rRetrying {i} {idx+1}/{len(failed)}...', end='', flush=True)
+                sys.stdout.flush()
+                previous_line_len = len(f'\rRetrying {i} {idx}/{len(failed)}...')
+                retry_download(to_retry[0], to_retry[1], wms_url, g_token, wh, temp_output_tiff, output_files)  
         
         print('\r' + ' ' * 150, end='\r', flush=True)
         sys.stdout.flush()
@@ -283,6 +356,7 @@ def download_wms_layer(wms_url, output_tiff):
         merge_tiffs(output_files, output_tiff)
     except Exception as e:
         print(f"Error: {str(e)}")
+        print('Exiting...')
         sys.stdout.flush()
         time.sleep(2)
         sys.exit(0)
@@ -291,22 +365,38 @@ if __name__ == "__main__":
     print('------WMS to TIFF------')
     sys.stdout.flush()
     
-    base_wms_url = 'https://webgis.abdac.it/server/services/ETT_PERIC_FRANA_DISTR/MapServer/WMSServer'
+    # base_wms_url = 'https://webgis.abdac.it/server/services/ETT_PERIC_FRANA_DISTR/MapServer/WMSServer'
     # base_wms_url = 'https://webgis.abdac.it/server/services/Pericolosit%C3%A0_idraulica_Progetto_PAI_distr___solo_fluviale___bozza_/MapServer/WMSServer'
 
     # base_wms_url = input('Please write the URL to the WMS Layer:\n')
     # clear_previous_lines(n=2)
 
+    urls = ['https://webgis.abdac.it/server/services/ETT_PERIC_FRANA_DISTR/MapServer/WMSServer', 'https://webgis.abdac.it/server/services/Pericolosit%C3%A0_idraulica_Progetto_PAI_distr___solo_fluviale___bozza_/MapServer/WMSServer']
+    for i, url in enumerate(urls):
+        print(i + 1, url)
+    base_wms_url_idx = int(input('Select the layer by index:\n')) - 1
+    base_wms_url = urls[base_wms_url_idx]
+    clear_previous_lines(n=len(urls) + 2)
+
+    print(f'You selected: {base_wms_url}')
+    time.sleep(2)
+    clear_previous_lines(n=1)
+
+    qs = int(input('Enter in how many parts you want to split the request (will be valid for x and y axes):\n'))
+    clear_previous_lines(n=2)
+
+    wh = int(input('Enter a value for width and height resolution:\n'))
+    clear_previous_lines(n=2)
+
     output_path = input('Please write a name for the output tiff file:\n')
     if not output_path.endswith('.tiff'):
         output_path += '.tiff'
-
     clear_previous_lines(n=2)
 
     print(f'Job started at {start_time}' + ' ' * 50)
     sys.stdout.flush()
     try:
-        download_wms_layer(base_wms_url, output_path)
+        download_wms_layer(base_wms_url, output_path, wh, qs)
         
         print(f'Job finished at {datetime.now()}')
         sys.stdout.flush()
@@ -316,6 +406,7 @@ if __name__ == "__main__":
 
     except Exception as e:
         print(f'Something went wrong: {str(e)}')
+        print('Exiting...')
         sys.stdout.flush()
         time.sleep(2)
         sys.exit(0)
