@@ -200,8 +200,8 @@ def merge_tiffs(files, output_file):
             for file in files:
                 if os.path.exists(file):
                     os.remove(file)
-            if os.listdir('temp') == []:
-                os.removedirs('temp')
+            if os.listdir(f'temp_{output_file.replace('.tiff', '')}') == []:
+                os.removedirs(f'temp_{output_file.replace('.tiff', '')}')
 
     except Exception as e:
         print(f"Error during merging: {str(e)}")
@@ -213,34 +213,38 @@ def merge_tiffs(files, output_file):
 def retry_download(bbox, i, wms_url, g_token, wh, temp_output_tiff, output_files):
     """If some chunk requests have failed this function will 
     try to download those parts of the file again"""
-    options = [
-                '-co', 'ALPHA=YES',
-                '-co', 'TILED=YES',
-                '-co', 'COMPRESS=LZW'
-            ]
+    try:
+        options = [
+                    '-co', 'ALPHA=YES',
+                    '-co', 'TILED=YES',
+                    '-co', 'COMPRESS=LZW'
+                ]
 
-    width, height = wh, wh
+        width, height = wh, wh
 
-    wms_url_with_size = f'{wms_url}?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetMap&styles=default&LAYERS=0&WIDTH={width}&HEIGHT={height}\
-        &FORMAT=image/png&TRANSPARENT=true&CRS=EPSG:4326&BBOX={bbox}&token={g_token}'
+        wms_url_with_size = f'{wms_url}?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetMap&styles=default&LAYERS=0&WIDTH={width}&HEIGHT={height}\
+            &FORMAT=image/png&TRANSPARENT=true&CRS=EPSG:4326&BBOX={bbox}&token={g_token}'
 
-    wms_dataset = gdal.Open(wms_url_with_size)
+        wms_dataset = gdal.Open(wms_url_with_size)
 
-    if wms_dataset is None:
-        print("GDAL failed to open the WMS dataset.")
-        sys.stdout.flush()
-        return
+        if wms_dataset is None:
+            print("GDAL failed to open the WMS dataset.")
+            sys.stdout.flush()
+            return
 
-    output_file_with_idx = temp_output_tiff.replace('.tiff', f'_{i}.tiff')
-    gdal.Translate(output_file_with_idx, wms_dataset, format='GTiff', width=width, height=height, options=options)
-    
-    output_files.append(output_file_with_idx)
+        output_file_with_idx = temp_output_tiff.replace('.tiff', f'_{i}.tiff')
+        gdal.Translate(output_file_with_idx, wms_dataset, format='GTiff', width=width, height=height, options=options)
+        
+        output_files.append(output_file_with_idx)
 
-    set_transparency(output_file_with_idx, output_file_with_idx.replace('.tiff', '_transp.tiff'), transparency=0.5)
-    output_files.remove(output_file_with_idx)
-    if os.path.exists(output_file_with_idx):
-        os.remove(output_file_with_idx)
-    output_files.append(output_file_with_idx.replace('.tiff', '_transp.tiff'))
+        set_transparency(output_file_with_idx, output_file_with_idx.replace('.tiff', '_transp.tiff'), transparency=0.5)
+        output_files.remove(output_file_with_idx)
+        if os.path.exists(output_file_with_idx):
+            os.remove(output_file_with_idx)
+        output_files.append(output_file_with_idx.replace('.tiff', '_transp.tiff'))
+    except Exception as e:
+        with open('error_log.txt', 'a') as f:
+            f.write(f'{datetime.now()} - file at index {i} - BoundingBox: {bbox} - ERROR:{str(e)}')
 
 
 def download_wms_layer(wms_url, output_tiff, wh, qs):
@@ -267,10 +271,10 @@ def download_wms_layer(wms_url, output_tiff, wh, qs):
 
         width, height = wh, wh
 
-        if 'temp' not in os.listdir():
-            os.mkdir('temp')
+        if f'temp_{output_tiff.replace('.tiff', '')}' not in os.listdir():
+            os.mkdir(f'temp_{output_tiff.replace('.tiff', '')}')
 
-        temp_output_tiff = os.path.join('temp', output_tiff)
+        temp_output_tiff = os.path.join(f'temp_{output_tiff.replace('.tiff', '')}', output_tiff)
 
         g_token = get_token()
 
