@@ -8,7 +8,9 @@ import sys
 import requests
 import numpy as np
 import os
+import boto3
 import time
+import json
 import warnings
 
 warnings.filterwarnings("ignore")
@@ -19,6 +21,8 @@ load_dotenv()
 
 USERNAME = os.getenv('USERNAME_DOTENV')
 PASSWORD = os.getenv('PASSWORD_DOTENV')
+
+CESIUM_TOKEN = os.getenv('CESIUM_TOKEN')
 
 gdal.SetConfigOption('GDAL_CACHEMAX', '2048')
 os.environ['GDAL_HTTP_TIMEOUT'] = '600'
@@ -365,6 +369,67 @@ def download_wms_layer(wms_url, output_tiff, wh, qs):
         time.sleep(2)
         sys.exit(0)
 
+def authenticate(file_name):
+    url = "https://api.cesium.com/v1/assets"
+
+    headers = {
+        "Authorization": f"Bearer {CESIUM_TOKEN}",
+        "Content-Type": "application/json"
+    }
+
+    payload = {
+        "name": file_name,
+        "description": "GeoTIFF test upload",
+        "type": "IMAGERY",
+        "options": {
+            "sourceType": "RASTER_IMAGERY"
+        }
+    }
+
+    response = requests.post(url, headers=headers, data=json.dumps(payload))
+    response_data = response.json()
+
+    if response.status_code == 201 or response.status_code == 200:
+        return response_data
+    else:
+        print(response.status_code)
+        print(f"Error: {response_data}")
+
+
+def cesium_upload(file_path):
+    file_name = os.path.basename(file_path)
+    response_data = authenticate(file_name)
+
+    bucket_name = response_data['uploadLocation']['bucket']
+    prefix = response_data['uploadLocation']['prefix']
+    access_key = response_data['uploadLocation']['accessKey']
+    secret_key = response_data['uploadLocation']['secretAccessKey']
+    session_token = response_data['uploadLocation']['sessionToken']
+
+    session = boto3.Session(
+        aws_access_key_id=access_key,
+        aws_secret_access_key=secret_key,
+        aws_session_token=session_token
+    )
+
+    s3 = session.client('s3')
+
+    with open(file_path, 'rb') as data:
+        s3.upload_fileobj(data, bucket_name, prefix + file_name)
+
+    upload_complete_url = response_data['onComplete']['url']
+    completion_headers = {
+    "Authorization": f"Bearer {CESIUM_TOKEN}"
+    }
+
+    response = requests.post(upload_complete_url, headers=completion_headers)
+
+    if response.status_code == 200 or response.status_code == 204:
+        print("Upload complete!")
+    else:
+        print(f"Error: {response.status_code} {response.text}")
+
+
 if __name__ == "__main__":
     print('------WMS to TIFF------')
     sys.stdout.flush()
@@ -402,11 +467,13 @@ if __name__ == "__main__":
     try:
         download_wms_layer(base_wms_url, output_path, wh, qs)
         
-        print(f'Job finished at {datetime.now()}')
+        print(f'Job finished at {datetime.now()}' + ' ' * 50)
         sys.stdout.flush()
         cwd = os.getcwd()
         print(f'File saved as {output_path} in {cwd}')
         sys.stdout.flush()
+
+        cesium_upload(output_path)
 
     except Exception as e:
         print(f'Something went wrong: {str(e)}')
