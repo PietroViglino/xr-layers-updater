@@ -16,3 +16,6 @@ wms2tiff_diego.py
 old/
 old/*
 config.py
+assets.json
+Layers.json
+Layers_backup.json
