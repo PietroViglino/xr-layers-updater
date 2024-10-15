@@ -1,0 +1,182 @@
+[
+    {
+        "LocalId": 23,
+        "Name": "Atlante_del_Rischio_da_frana",
+        "Url": "https://webgis.abdac.it/server/rest/services/Hosted/Atlante_del_Rischio_da_frana/VectorTileServer",
+        "ParentUrl": "https://webgis.abdac.it/server/rest/services/RISCHIO_IDROGEOLOGICO_3_06_09_2024/MapServer"
+    },
+    {
+        "LocalId": 171,
+        "Name": "pai_abruzzo_g16_3857",
+        "Url": "https://webgis.abdac.it/server/rest/services/Hosted/pai_abruzzo_g16_3857/VectorTileServer",
+        "ParentUrl": "https://webgis.abdac.it/server/rest/services/RISCHIO_IDROGEOLOGICO_3_06_09_2024/MapServer"
+    },
+    {
+        "LocalId": 102,
+        "Name": "pai_abruzzo_pericolosita_3857",
+        "Url": "https://webgis.abdac.it/server/rest/services/Hosted/pai_abruzzo_pericolosita_3857/VectorTileServer",
+        "ParentUrl": "https://webgis.abdac.it/server/rest/services/RISCHIO_IDROGEOLOGICO_3_06_09_2024/MapServer"
+    },
+    {
+        "LocalId": 122,
+        "Name": "pai_abruzzo_scarpate_3857",
+        "Url": "https://webgis.abdac.it/server/rest/services/Hosted/pai_abruzzo_scarpate_3857/VectorTileServer",
+        "ParentUrl": "https://webgis.abdac.it/server/rest/services/RISCHIO_IDROGEOLOGICO_3_06_09_2024/MapServer"
+    },
+    {
+        "LocalId": 117,
+        "Name": "pai_abruzzo_fasce_rispetto_3857",
+        "Url": "https://webgis.abdac.it/server/rest/services/Hosted/pai_abruzzo_fasce_rispetto_3857/VectorTileServer",
+        "ParentUrl": "https://webgis.abdac.it/server/rest/services/RISCHIO_IDROGEOLOGICO_3_06_09_2024/MapServer"
+    },
+    {
+        "LocalId": 116,
+        "Name": "pai_abruzzo_rischio_3857",
+        "Url": "https://webgis.abdac.it/server/rest/services/Hosted/pai_abruzzo_rischio_3857/VectorTileServer",
+        "ParentUrl": "https://webgis.abdac.it/server/rest/services/RISCHIO_IDROGEOLOGICO_3_06_09_2024/MapServer"
+    },
+    {
+        "LocalId": 113,
+        "Name": "pai_abruzzo_g01_3857_v2",
+        "Url": "https://webgis.abdac.it/server/rest/services/Hosted/pai_abruzzo_g01_3857_v2/VectorTileServer",
+        "ParentUrl": "https://webgis.abdac.it/server/rest/services/RISCHIO_IDROGEOLOGICO_3_06_09_2024/MapServer"
+    },
+    {
+        "LocalId": 118,
+        "Name": "pai_abruzzo_g02_3857",
+        "Url": "https://webgis.abdac.it/server/rest/services/Hosted/pai_abruzzo_g02_3857/VectorTileServer",
+        "ParentUrl": "https://webgis.abdac.it/server/rest/services/RISCHIO_IDROGEOLOGICO_3_06_09_2024/MapServer"
+    },
+    {
+        "LocalId": 119,
+        "Name": "pai_abruzzo_g03_3857",
+        "Url": "https://webgis.abdac.it/server/rest/services/Hosted/pai_abruzzo_g03_3857/VectorTileServer",
+        "ParentUrl": "https://webgis.abdac.it/server/rest/services/RISCHIO_IDROGEOLOGICO_3_06_09_2024/MapServer"
+    },
+    {
+        "LocalId": 114,
+        "Name": "pai_abruzzo_g04_3857",
+        "Url": "https://webgis.abdac.it/server/rest/services/Hosted/pai_abruzzo_g04_3857/VectorTileServer",
+        "ParentUrl": "https://webgis.abdac.it/server/rest/services/RISCHIO_IDROGEOLOGICO_3_06_09_2024/MapServer"
+    },
+    {
+        "LocalId": 115,
+        "Name": "pai_abruzzo_g05_3857_v3",
+        "Url": "https://webgis.abdac.it/server/rest/services/Hosted/pai_abruzzo_g05_3857_v3/VectorTileServer",
+        "ParentUrl": "https://webgis.abdac.it/server/rest/services/RISCHIO_IDROGEOLOGICO_3_06_09_2024/MapServer"
+    },
+    {
+        "LocalId": 153,
+        "Name": "pai_abruzzo_g06_3857_v2",
+        "Url": "https://webgis.abdac.it/server/rest/services/Hosted/pai_abruzzo_g06_3857_v2/VectorTileServer",
+        "ParentUrl": "https://webgis.abdac.it/server/rest/services/RISCHIO_IDROGEOLOGICO_3_06_09_2024/MapServer"
+    },
+    {
+        "LocalId": 154,
+        "Name": "pai_abruzzo_g07_3857",
+        "Url": "https://webgis.abdac.it/server/rest/services/Hosted/pai_abruzzo_g07_3857/VectorTileServer",
+        "ParentUrl": "https://webgis.abdac.it/server/rest/services/RISCHIO_IDROGEOLOGICO_3_06_09_2024/MapServer"
+    },
+    {
+        "LocalId": 155,
+        "Name": "pai_abruzzo_g08_3857",
+        "Url": "https://webgis.abdac.it/server/rest/services/Hosted/pai_abruzzo_g08_3857/VectorTileServer",
+        "ParentUrl": "https://webgis.abdac.it/server/rest/services/RISCHIO_IDROGEOLOGICO_3_06_09_2024/MapServer"
+    },
+    {
+        "LocalId": 111,
+        "Name": "pai_abruzzo_g09_3857",
+        "Url": "https://webgis.abdac.it/server/rest/services/Hosted/pai_abruzzo_g09_3857/VectorTileServer",
+        "ParentUrl": "https://webgis.abdac.it/server/rest/services/RISCHIO_IDROGEOLOGICO_3_06_09_2024/MapServer"
+    },
+    {
+        "LocalId": 112,
+        "Name": "pai_abruzzo_g10_3857",
+        "Url": "https://webgis.abdac.it/server/rest/services/Hosted/pai_abruzzo_g10_3857/VectorTileServer",
+        "ParentUrl": "https://webgis.abdac.it/server/rest/services/RISCHIO_IDROGEOLOGICO_3_06_09_2024/MapServer"
+    },
+    {
+        "LocalId": 156,
+        "Name": "pai_abruzzo_g11_3857",
+        "Url": "https://webgis.abdac.it/server/rest/services/Hosted/pai_abruzzo_g11_3857/VectorTileServer",
+        "ParentUrl": "https://webgis.abdac.it/server/rest/services/RISCHIO_IDROGEOLOGICO_3_06_09_2024/MapServer"
+    },
+    {
+        "LocalId": 157,
+        "Name": "pai_abruzzo_g12_3857",
+        "Url": "https://webgis.abdac.it/server/rest/services/Hosted/pai_abruzzo_g12_3857/VectorTileServer",
+        "ParentUrl": "https://webgis.abdac.it/server/rest/services/RISCHIO_IDROGEOLOGICO_3_06_09_2024/MapServer"
+    },
+    {
+        "LocalId": 168,
+        "Name": "pai_abruzzo_g13_3857",
+        "Url": "https://webgis.abdac.it/server/rest/services/Hosted/pai_abruzzo_g13_3857/VectorTileServer",
+        "ParentUrl": "https://webgis.abdac.it/server/rest/services/RISCHIO_IDROGEOLOGICO_3_06_09_2024/MapServer"
+    },
+    {
+        "LocalId": 169,
+        "Name": "pai_abruzzo_g14_3857",
+        "Url": "https://webgis.abdac.it/server/rest/services/Hosted/pai_abruzzo_g14_3857/VectorTileServer",
+        "ParentUrl": "https://webgis.abdac.it/server/rest/services/RISCHIO_IDROGEOLOGICO_3_06_09_2024/MapServer"
+    },
+    {
+        "LocalId": 1701,
+        "Name": "pai_abruzzo_g15_3857",
+        "Url": "https://webgis.abdac.it/server/rest/services/Hosted/pai_abruzzo_g15_3857/VectorTileServer",
+        "ParentUrl": "https://webgis.abdac.it/server/rest/services/RISCHIO_IDROGEOLOGICO_3_06_09_2024/MapServer"
+    },
+    {
+        "LocalId": 172,
+        "Name": "pai_abruzzo_g17_3857",
+        "Url": "https://webgis.abdac.it/server/rest/services/Hosted/pai_abruzzo_g17_3857/VectorTileServer",
+        "ParentUrl": "https://webgis.abdac.it/server/rest/services/RISCHIO_IDROGEOLOGICO_3_06_09_2024/MapServer"
+    },
+    {
+        "LocalId": 150,
+        "Name": "pai_abruzzo_g18_3857",
+        "Url": "https://webgis.abdac.it/server/rest/services/Hosted/pai_abruzzo_g18_3857/VectorTileServer",
+        "ParentUrl": "https://webgis.abdac.it/server/rest/services/RISCHIO_IDROGEOLOGICO_3_06_09_2024/MapServer"
+    },
+    {
+        "LocalId": 191,
+        "Name": "pai_abruzzo_g19_3857",
+        "Url": "https://webgis.abdac.it/server/rest/services/Hosted/pai_abruzzo_g19_3857/VectorTileServer",
+        "ParentUrl": "https://webgis.abdac.it/server/rest/services/RISCHIO_IDROGEOLOGICO_3_06_09_2024/MapServer"
+    },
+    {
+        "LocalId": 173,
+        "Name": "pai_abruzzo_g20_3857",
+        "Url": " https://webgis.abdac.it/server/rest/services/Hosted/pai_abruzzo_g20_3857/VectorTileServer",
+        "ParentUrl": "https://webgis.abdac.it/server/rest/services/RISCHIO_IDROGEOLOGICO_3_06_09_2024/MapServer"
+    },
+    {
+        "LocalId": 174,
+        "Name": "pai_abruzzo_g21_3857",
+        "Url": "https://webgis.abdac.it/server/rest/services/Hosted/pai_abruzzo_g21_3857/VectorTileServer",
+        "ParentUrl": "https://webgis.abdac.it/server/rest/services/RISCHIO_IDROGEOLOGICO_3_06_09_2024/MapServer"
+    },
+    {
+        "LocalId": 151,
+        "Name": "pai_abruzzo_g22_3857",
+        "Url": "https://webgis.abdac.it/server/rest/services/Hosted/pai_abruzzo_g22_3857/VectorTileServer",
+        "ParentUrl": "https://webgis.abdac.it/server/rest/services/RISCHIO_IDROGEOLOGICO_3_06_09_2024/MapServer"
+    },
+    {
+        "LocalId": 175,
+        "Name": "pai_abruzzo_g23_3857",
+        "Url": "https://webgis.abdac.it/server/rest/services/Hosted/pai_abruzzo_g23_3857/VectorTileServer",
+        "ParentUrl": "https://webgis.abdac.it/server/rest/services/RISCHIO_IDROGEOLOGICO_3_06_09_2024/MapServer"
+    },
+    {
+        "LocalId": 152,
+        "Name": "pai_abruzzo_g24_3857",
+        "Url": "https://webgis.abdac.it/server/rest/services/Hosted/pai_abruzzo_g24_3857/VectorTileServer",
+        "ParentUrl": "https://webgis.abdac.it/server/rest/services/RISCHIO_IDROGEOLOGICO_3_06_09_2024/MapServer"
+    },
+    {
+        "LocalId": 176,
+        "Name": "pai_abruzzo_g25_3857",
+        "Url": "https://webgis.abdac.it/server/rest/services/Hosted/pai_abruzzo_g25_3857/VectorTileServer",
+        "ParentUrl": "https://webgis.abdac.it/server/rest/services/RISCHIO_IDROGEOLOGICO_3_06_09_2024/MapServer"
+    }
+]

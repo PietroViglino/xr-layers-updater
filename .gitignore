@@ -8,3 +8,11 @@ dist/
 build/
 .venv/
 .venv/*
+__pycache__/
+__pycache__/*
+testdir/
+testdir/*
+wms2tiff_diego.py
+old/
+old/*
+config.py

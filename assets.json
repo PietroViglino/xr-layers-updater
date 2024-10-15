@@ -1,0 +1,12 @@
+[
+    {
+        "Name": "Pericolosit\u00e0_idraulica_Progetto_PAI_distr___solo_fluviale___bozza_",
+        "Id": 2771445,
+        "Url": "https://webgis.abdac.it/server/services/Pericolosit%C3%A0_idraulica_Progetto_PAI_distr___solo_fluviale___bozza_/MapServer/WMSServer"
+    },
+    {
+        "Name": "ETT_PERIC_FRANA_DISTR",
+        "Id": 2771359,
+        "Url": "https://webgis.abdac.it/server/services/ETT_PERIC_FRANA_DISTR/MapServer/WMSServer"
+    }
+]

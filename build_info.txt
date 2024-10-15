@@ -1,7 +1,0 @@
-To build a standalone .exe file run the following command in the terminal:
-
-$ pyinstaller --onefile wms2tiff.py
-
-To build a directory containg a faster .exe file run the following command:
-
-$ pyinstaller --onedir wms2tiff.py
